@@ -1,0 +1,59 @@
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.swp
+*.swo
+*.egg-info/
+*.egg
+*.log
+env/
+venv/
+.venv/
+*.sqlite3
+*.db
+*.env
+
+# -----------------------------
+# Flask
+# -----------------------------
+instance/
+.webassets-cache
+
+# -----------------------------
+# VS 2022
+# -----------------------------
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.pyproj.user
+*.sln
+obj/
+Debug/
+Release/
+
+# -----------------------------
+# Frontend (if React or JS added later)
+# -----------------------------
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# -----------------------------
+# OS / Misc
+# -----------------------------
+.DS_Store
+Thumbs.db
+*.bak
+*~
+*.orig
+*.patch
+*.rej
+*.lock
