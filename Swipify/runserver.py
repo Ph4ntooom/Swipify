@@ -8,18 +8,15 @@ from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
-# Initialize Flask app
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # For session management
+app.secret_key = os.urandom(24)
 
-# Load environment variables
 dotenv_path = os.path.join(os.path.dirname(__file__), "Swipify", ".env")
 load_dotenv(dotenv_path)
 
 client_id = os.getenv("SPOTIFY_CLIENT_ID")
 client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-# Initialize Spotify client
 sp = spotipy.Spotify(
     client_credentials_manager=SpotifyClientCredentials(
         client_id=client_id,
@@ -27,25 +24,21 @@ sp = spotipy.Spotify(
     )
 )
 
-# Load dataset
 csv_file = "Songs_Dataset_Normalized.csv"
 df = pd.read_csv(csv_file)
 
-# Define audio features
 features = ["danceability", "energy", "loudness", "speechiness", 
             "acousticness", "instrumentalness", "liveness", "valence", "tempo"]
 
-def get_initial_recommendations(num=5):
+def get_initial_recommendations(num=1):
     """Get random initial recommendations"""
     return df.sample(num)
 
-def get_recommendations(user_vector, excluded_ids, num_recommendations=5):
+def get_recommendations(user_vector, excluded_ids, num_recommendations=1):
     """Get song recommendations based on user vector"""
-    # Filter out already seen songs
     df_filtered = df[~df['track_id'].isin(excluded_ids)].copy()
     
     if len(df_filtered) == 0:
-        # If all songs seen, reset
         df_filtered = df.copy()
     
     song_vectors = df_filtered[features].values
@@ -83,12 +76,10 @@ def get_track_info(track_id):
 @app.route('/')
 def index():
     """Initial page load with random recommendations"""
-    # Initialize session variables
     session['user_vector'] = None
     session['seen_tracks'] = []
     
-    # Get initial random recommendations
-    initial_recs = get_initial_recommendations(5)
+    initial_recs = get_initial_recommendations(1)
     track_ids = initial_recs['track_id'].tolist()
     
     tracks_info = []
@@ -107,31 +98,25 @@ def swipe_right():
     if not track_id:
         return "No track ID provided", 400
     
-    # Get current user vector from session
     user_vector = session.get('user_vector')
     seen_tracks = session.get('seen_tracks', [])
     
-    # Get song vector
     song_data = df[df['track_id'] == track_id]
     if song_data.empty:
         return "Track not found", 404
     
     song_vector = song_data[features].values[0]
     
-    # Update user vector
     if user_vector is None:
         user_vector = song_vector.tolist()
     else:
         user_vector = np.array(user_vector)
-        # Average with the new liked song
         user_vector = ((user_vector + song_vector) / 2).tolist()
     
-    # Update session
     seen_tracks.append(track_id)
     session['user_vector'] = user_vector
     session['seen_tracks'] = seen_tracks
     
-    # Get new recommendations
     track_ids = get_recommendations(np.array(user_vector), seen_tracks)
     
     tracks_info = []
@@ -150,29 +135,23 @@ def swipe_left():
     if not track_id:
         return "No track ID provided", 400
     
-    # Get current user vector from session
     user_vector = session.get('user_vector')
     seen_tracks = session.get('seen_tracks', [])
     
-    # Mark as seen
     seen_tracks.append(track_id)
     session['seen_tracks'] = seen_tracks
     
-    # If user has preferences, penalize this song's features
     if user_vector is not None:
         song_data = df[df['track_id'] == track_id]
         if not song_data.empty:
             song_vector = song_data[features].values[0]
             user_vector = np.array(user_vector)
-            # Move away from disliked song's features
             user_vector = (user_vector - 0.3 * song_vector).tolist()
             session['user_vector'] = user_vector
     
-    # Get new recommendations
     if user_vector is not None:
         track_ids = get_recommendations(np.array(user_vector), seen_tracks)
     else:
-        # If no preferences yet, show random songs
         initial_recs = get_initial_recommendations(5)
         track_ids = initial_recs['track_id'].tolist()
     
