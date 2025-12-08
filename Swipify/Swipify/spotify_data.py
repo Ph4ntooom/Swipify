@@ -7,15 +7,6 @@ from sklearn.preprocessing import MinMaxScaler
 
 load_dotenv()
 
-client_id = os.getenv("SPOTIFY_CLIENT_ID")
-client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
-
-sp = spotipy.Spotify(
-    client_credentials_manager=SpotifyClientCredentials(
-        client_id=client_id,
-        client_secret=client_secret
-    )
-)
 
 print("Client ID Loaded:", client_id)
 

@@ -1,0 +1,376 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipify - Music Recommendation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1DB954 0%, #191414 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+            .header h1 {
+                font-size: 48px;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .header p {
+                font-size: 18px;
+                opacity: 0.9;
+            }
+
+        .reset-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .reset-btn:hover {
+                background: white;
+                color: #1DB954;
+            }
+
+        .card-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+            perspective: 1000px;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+            .card:nth-child(1) {
+                z-index: 5;
+            }
+
+            .card:nth-child(2) {
+                z-index: 4;
+                transform: scale(0.95) translateY(10px);
+                opacity: 0.8;
+            }
+
+            .card:nth-child(3) {
+                z-index: 3;
+                transform: scale(0.9) translateY(20px);
+                opacity: 0.6;
+            }
+
+            .card:nth-child(n+4) {
+                z-index: 2;
+                transform: scale(0.85) translateY(30px);
+                opacity: 0.4;
+            }
+
+        .card-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .track-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #191414;
+        }
+
+        .artist-name {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+            .artist-name a {
+                color: #1DB954;
+                text-decoration: none;
+            }
+
+                .artist-name a:hover {
+                    text-decoration: underline;
+                }
+
+        .spotify-link {
+            display: inline-block;
+            background: #1DB954;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+            .spotify-link:hover {
+                background: #1ed760;
+            }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .swipe-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .swipe-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .swipe-btn:active {
+                transform: scale(0.95);
+            }
+
+        .btn-left {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+
+        .btn-right {
+            background: linear-gradient(135deg, #1DB954, #1ed760);
+            color: white;
+        }
+
+        .no-songs {
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            padding: 40px;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        @keyframes swipeRight {
+            to {
+                transform: translateX(600px) rotate(30deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes swipeLeft {
+            to {
+                transform: translateX(-600px) rotate(-30deg);
+                opacity: 0;
+            }
+        }
+
+        .swipe-right-animation {
+            animation: swipeRight 0.5s ease-out forwards;
+        }
+
+        .swipe-left-animation {
+            animation: swipeLeft 0.5s ease-out forwards;
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 36px;
+            }
+
+            .card-container {
+                height: 550px;
+            }
+
+            .card-image {
+                height: 350px;
+            }
+
+            .swipe-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/reset" class="reset-btn">🔄 Reset</a>
+
+    <div class="header">
+        <h1>🎵 Swipify</h1>
+        <p>Swipe right to like, left to pass</p>
+    </div>
+
+    <div class="card-container">
+        {% if tracks and tracks|length > 0 %}
+        {% for track in tracks %}
+        <div class="card" data-track-id="{{ track.track_id }}">
+            <img src="{{ track.album_image_url }}" alt="{{ track.track_name }}" class="card-image">
+            <div class="card-content">
+                <div class="track-name">{{ track.track_name }}</div>
+                <div class="artist-name">
+                    <a href="{{ track.artist_url }}" target="_blank">{{ track.artists }}</a>
+                </div>
+                <a href="{{ track.track_url }}" target="_blank" class="spotify-link">
+                    ▶️ Play on Spotify
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="no-songs">
+            <p>No more songs available! Click Reset to start over.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if tracks and tracks|length > 0 %}
+    <div class="button-container">
+        <form method="POST" action="/swipe_left" id="swipeLeftForm">
+            <input type="hidden" name="track_id" id="leftTrackId">
+            <button type="button" class="swipe-btn btn-left" onclick="handleSwipe('left')">👎</button>
+        </form>
+        <form method="POST" action="/swipe_right" id="swipeRightForm">
+            <input type="hidden" name="track_id" id="rightTrackId">
+            <button type="button" class="swipe-btn btn-right" onclick="handleSwipe('right')">❤️</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <script>
+        function handleSwipe(direction) {
+            const cards = document.querySelectorAll('.card');
+            if (cards.length === 0) return;
+
+            const topCard = cards[0];
+            const trackId = topCard.getAttribute('data-track-id');
+
+            // Add animation class
+            if (direction === 'right') {
+                topCard.classList.add('swipe-right-animation');
+                document.getElementById('rightTrackId').value = trackId;
+            } else {
+                topCard.classList.add('swipe-left-animation');
+                document.getElementById('leftTrackId').value = trackId;
+            }
+
+            // Wait for animation to complete, then submit form
+            setTimeout(() => {
+                if (direction === 'right') {
+                    document.getElementById('swipeRightForm').submit();
+                } else {
+                    document.getElementById('swipeLeftForm').submit();
+                }
+            }, 500);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                handleSwipe('left');
+            } else if (e.key === 'ArrowRight') {
+                handleSwipe('right');
+            }
+        });
+
+        // Touch swipe support for mobile
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        const cardContainer = document.querySelector('.card-container');
+
+        if (cardContainer) {
+            cardContainer.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+            });
+
+            cardContainer.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentX = e.touches[0].clientX;
+                const diff = currentX - startX;
+                const cards = document.querySelectorAll('.card');
+                if (cards.length > 0) {
+                    const topCard = cards[0];
+                    topCard.style.transform = `translateX(${diff}px) rotate(${diff * 0.1}deg)`;
+                }
+            });
+
+            cardContainer.addEventListener('touchend', () => {
+                if (!isDragging) return;
+                isDragging = false;
+
+                const diff = currentX - startX;
+                const cards = document.querySelectorAll('.card');
+
+                if (cards.length > 0) {
+                    const topCard = cards[0];
+
+                    if (Math.abs(diff) > 100) {
+                        if (diff > 0) {
+                            handleSwipe('right');
+                        } else {
+                            handleSwipe('left');
+                        }
+                    } else {
+                        topCard.style.transform = '';
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
